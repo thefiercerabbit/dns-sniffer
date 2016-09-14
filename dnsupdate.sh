@@ -13,7 +13,7 @@ if [ `whoami` != "root" ]
 then
         sudo -s "$0" "$@"
         if [ $? -ne 0 ] ; then
-            echo "This script need root privileges"
+            echo "This script needs root privileges"
             exit 1
         fi
 	exit 0
