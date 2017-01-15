@@ -50,7 +50,7 @@ eval $CAPTURE_PROGR $CAPTURE_FLAGS |
     eval $FILTER_PROGR "$FILTER_FLAGS" |
     #tee /dev/fd/2 |
     while IFS='|' read TIMESTAMP MAC_SRC MAC_DST IP_SRC IP_DST PROTOCOL URL DNS_RESPONSE DNS_QRY_TYPE; do
-        if [[ "$PROTOCOL" = "DNS" && "$DNS_QRY_TYPE" = "1" ]]; then
+        if [[ "$PROTOCOL" = "DNS" && ("$DNS_QRY_TYPE" = "1" OR "$DNS_QRY_TYP" = "28") ]]; then
             echo "INSERT INTO DNS VALUES ('$TIMESTAMP', '$MAC_SRC', '$MAC_DST', '$IP_SRC','$IP_DST','$URL','$DNS_RESPONSE', '$DNS_QRY_TYPE');"
 	    printf "%10s %20s %20s %15s %15s %-3s %-s\n" "$(date -d @${TIMESTAMP} '+%H:%M:%S')" "$MAC_SRC" "$MAC_DST" "$IP_SRC" "$IP_DST" "$PROTOCOL" "$URL" >/dev/stderr
     done |

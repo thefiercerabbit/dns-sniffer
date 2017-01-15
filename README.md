@@ -1,5 +1,5 @@
 # dns-sniffer
-This is a very simple script sniffing DNS traffic of a local network. Only DNS request of type A are logged (one can easily extend to AAAA if needed).
+This is a very simple script sniffing DNS traffic of a local network.
 You will need *tshark* and a network adapter in *monitor mode*. If you are sniffing WiFi traffic, configure your adapter to listen to the right channel.
 
 # Why is it different ?
