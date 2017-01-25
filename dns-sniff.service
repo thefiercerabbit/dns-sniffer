@@ -1,0 +1,12 @@
+[Unit]
+Description=Homemade DNS query sniffer
+After=network.target
+
+[Service]
+Type=simple
+RemainAfterExit=no
+ExecStart=/home/pi/dnsniff.sh
+PIDFile=/tmp/dns-sniff.pid
+
+[Install]
+WantedBy=multi-user.target
