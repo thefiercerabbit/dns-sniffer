@@ -8,14 +8,13 @@ CHANNEL="11"
 
 DB_FILE="/home/pi/dns.db"
 LOG_FILE="/home/pi/dns.log" # can be replaced with '/dev/stderr' if running in foreground
+DOT11DECRYPT_PREFIX="/home/pi/dot11decrypt/build/"
 
 function _kill_all() {
     [ -n "$CPID1" ] && ((ps -p $CPID1 2>&1 > /dev/null) ||  (kill -2 $CPID1 2>&1 >/dev/null || kill -9 $CPID1)) && wait $CPID1
 }
 
 trap "_kill_all" 0
-
-DOT11DECRYPT_PREFIX="/home/pi/dot11decrypt/build/"
 
 if [ `whoami` != "root" ]
 then
@@ -38,8 +37,8 @@ fi
 # Since we only write small amount of text, we consider the buffer of the system call 'write' to be large enough
 # and a concurrent processes writing on the same file should still be fine (no text interlacing).
 
-echo "" > "$LOG_FILE" # erase old version of the file
-${DOT11DECRYPT_PREFIX}/dot11decrypt $INTERFACE "${ENC}:${SSID}:${PWD}" 2>&1 >> $LOG_FILE
+echo -n "" > "$LOG_FILE"
+${DOT11DECRYPT_PREFIX}/dot11decrypt $INTERFACE "${ENC}:${SSID}:${PWD}" > >(awk '{printf strftime("%D %T") " " $0 "\n"; fflush();}' >> $LOG_FILE) &
 CPID1=$!
 echo "Process $CPID1 launched in background" >> $LOG_FILE
 
