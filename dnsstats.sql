@@ -18,7 +18,7 @@ WHERE T1.url in (
       FROM TEMP1 AS T2
       WHERE T2.ip_src=T1.ip_src and T2.cnt>=T1.cnt
       ORDER BY T2.cnt DESC
-      LIMIT 10 --Or whatever you want it to be
+      LIMIT 5 --Or whatever you want it to be
 )
 ORDER BY ip_src ASC,cnt DESC;
 
@@ -27,4 +27,4 @@ ORDER BY ip_src ASC,cnt DESC;
 .print 'LAST DNS REQUESTS'
 SELECT datetime(timestamp,'unixepoch') as TIME, mac_src, ip_src, url
 FROM DNS
-ORDER BY time DESC LIMIT 15;
+ORDER BY time DESC LIMIT 25;

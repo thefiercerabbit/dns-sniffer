@@ -1,8 +1,16 @@
 # dns-sniffer
-This is a very simple script sniffing DNS traffic of a local network.
-You will need *tshark* and a network adapter in *monitor mode*. If you are sniffing WiFi traffic, configure your adapter to listen to the right channel.
+## In brief
+This is a very simple script sniffing and decrypting DNS traffic of a WLAN network.
 
-# Why is it different ?
-*tshark* needs to read from a capture file. Even if you're not recording any event, but just displaying some stuff, *tshark* creates a temp file (generaly in */tmp*) which can get pretty big after some time... This script launches *dumpcap* on its own, and use a pipe redirection to avoid the creation of a temp file.
-This feature was compulsory for me, since it runs on a Raspberry Pi 2 with very few memory. Moreover, if some other hack would have been possible with the "ring buffer" option of *dumpcap*/*tshark*, it would still need to do IO operations on the disk (USB key in my case). Here, the redirected stdout fits in RAM.
+## History
+Previously, the script was using both *dumpcap* and *tshark*, the former for the capture, the latter for the decryption and filtering.
+However, *dumpcap* was unusable for long time capture because of its memory consumption (see [here](https://wiki.wireshark.org/KnownBugs/OutOfMemory)).
+Thus the use of *decrypt11dot*, which does the job perfectly.
+Also, *tshark* was replace by *tcpdump*, a bit more efficient for easy tasks like printing MAC and IP adrresses, or requested URLs.
 
+## Usage
+You will need *tcpdump*, [dot11decrypt](https://github.com/mfontanini/dot11decrypt) and a network adapter in *monitor mode*.
+Replace the first fields of the script by your own network parameters (encrypion, SSID, password, channel), update the interface, log and database files.
+Launch has root.
+
+A basic *systemd* service file has been included, for those who may need a startup daemon (see *systemd* for your distribution).
