@@ -57,7 +57,7 @@ using std::condition_variable;
 using std::move;
 using std::memset;
 using std::bind;
-using std::cout;
+using std::cerr;
 using std::endl;
 using std::runtime_error;
 using std::invalid_argument;
@@ -177,12 +177,12 @@ private:
   }
 
   void on_ap_found(const string& ssid, const address_type& bssid) {
-    cout << "AP found: " << ssid << ": " << bssid << endl;
+    cerr << "AP found: " << ssid << ": " << bssid << endl;
   }
 
   void on_handshake_captured(const string& ssid, const address_type& bssid, 
 			     const address_type& client_hw) {
-    cout << "Captured handshake for " << ssid << " (" << bssid << "): " << client_hw << endl;
+    cerr << "Captured handshake for " << ssid << " (" << bssid << "): " << client_hw << endl;
   }
     
   template<typename Decrypter>
@@ -295,7 +295,7 @@ private:
     const DNS dns = pdu.rfind_pdu<RawPDU>().to<DNS>();
     const auto& ip = pdu.rfind_pdu<IP>();
     const auto& eth = pdu.rfind_pdu<EthernetII>();
-    cout << time(NULL) << " " << eth.src_addr() << " " << eth.dst_addr() << " " << ip.src_addr() << " " << ip.dst_addr() << " " << dns.queries().front().dname() << std::endl;
+    std::cout << time(NULL) << " " << eth.src_addr() << " " << eth.dst_addr() << " " << ip.src_addr() << " " << ip.dst_addr() << " " << dns.queries().front().dname() << std::endl;
     return true;
   }
   
@@ -323,7 +323,7 @@ void if_up(const char *name) {
    
   if ((err = ioctl(fd, SIOCGIFFLAGS, (void *) &ifr)) < 0) {
     close(fd);
-    cout << strerror(errno) << endl;
+    cerr << strerror(errno) << endl;
     throw runtime_error("Failed get flags");
   }
    
@@ -331,7 +331,7 @@ void if_up(const char *name) {
    
   if ((err = ioctl(fd, SIOCSIFFLAGS, (void *) &ifr)) < 0) {
     close(fd);
-    cout << strerror(errno) << endl;
+    cerr << strerror(errno) << endl;
     throw runtime_error("Failed to bring the interface up");
   }
 }
@@ -362,7 +362,7 @@ tuple<unique_fd, string> create_tap_dev() {
 // sig_handler - SIGINT handler, so we can release resources appropriately
 void sig_handler(int) {
   if (running) {
-    cout << "Stopping the sniffer...\n";
+    cerr << "Stopping the sniffer...\n";
     running = false; 
   }
 }
@@ -372,7 +372,7 @@ typedef tuple<Crypto::WPA2Decrypter, Crypto::WEPDecrypter> decrypter_tuple;
 
 // Creates a traffic_decrypter and puts it to work
 void decrypt_traffic(unique_fd fd, const string &iface, decrypter_tuple tup) {
-  cout << "Starting sniffing and decrypting traffic..." << endl;
+  cerr << "Starting sniffing and decrypting traffic..." << endl;
   SnifferConfiguration config;
   config.set_promisc_mode(false);
   Sniffer sniffer(iface, config);
@@ -420,13 +420,13 @@ decrypter_tuple parse_args(const vector<string> &args) {
 }
 
 void print_usage(const char *arg0){
-  cout << "Usage: " << arg0 << " <interface> DECRYPTION_DATA [DECRYPTION_DATA] [...]\n\n";
-  cout << "Where DECRYPTION_DATA can be: \n";
-  cout << "\twpa:SSID:PSK - to specify WPA2(AES or TKIP) decryption data.\n";
-  cout << "\twep:BSSID:KEY - to specify WEP decryption data.\n\n";
-  cout << "Examples:\n";
-  cout << "\t" << arg0 << " wlan0 wpa:MyAccessPoint:some_password\n";
-  cout << "\t" << arg0 << " mon0 wep:00:01:02:03:04:05:blahbleehh\n";
+  cerr << "Usage: " << arg0 << " <interface> DECRYPTION_DATA [DECRYPTION_DATA] [...]\n\n";
+  cerr << "Where DECRYPTION_DATA can be: \n";
+  cerr << "\twpa:SSID:PSK - to specify WPA2(AES or TKIP) decryption data.\n";
+  cerr << "\twep:BSSID:KEY - to specify WEP decryption data.\n\n";
+  cerr << "Examples:\n";
+  cerr << "\t" << arg0 << " wlan0 wpa:MyAccessPoint:some_password\n";
+  cerr << "\t" << arg0 << " mon0 wep:00:01:02:03:04:05:blahbleehh\n";
   exit(1);
 }
 
@@ -440,22 +440,22 @@ int main(int argc, char *argv[])
     string dev_name;
     unique_fd fd;
     tie(fd, dev_name) = create_tap_dev();
-    cout << "Using device: " << dev_name << endl;
+    cerr << "Using device: " << dev_name << endl;
     if_up(dev_name.c_str());
-    cout << "Device is up.\n";
+    cerr << "Device is up.\n";
     signal(SIGINT, sig_handler);
     running = true;
     dns_sniffer dns(dev_name);
     dns.run();
-    cout << "Ready to read on " << dev_name << "." << endl;
+    cerr << "Ready to read on " << dev_name << "." << endl;
     decrypt_traffic(move(fd), argv[1], move(decrypters));
-    cout << "Done\n";
+    cerr << "Done\n";
   }
   catch(invalid_argument& ex) {
-    cout << "[-] " << ex.what() << endl;
+    cerr << "[-] " << ex.what() << endl;
     print_usage(*argv);
   }
   catch(exception& ex) {
-    cout << "[-] " << ex.what() << endl;
+    cerr << "[-] " << ex.what() << endl;
   }
 }

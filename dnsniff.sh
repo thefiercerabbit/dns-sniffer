@@ -8,7 +8,7 @@ CHANNEL="to_replace"
 
 DB_FILE="/home/pi/dns.db"
 LOG_FILE="/home/pi/dns.log" # can be replaced with '/dev/stderr' if running in foreground
-DOT11DECRYPT_PREFIX="/home/pi/dot11decrypt/build/"
+SNIFFER_PREFIX="/home/pi/bin/"
 
 function _kill_all() {
     [ -n "$CPID1" ] && ((ps -p $CPID1 2>&1 > /dev/null) ||  (kill -2 $CPID1 2>&1 >/dev/null || kill -9 $CPID1)) && wait $CPID1
@@ -28,22 +28,20 @@ ifconfig $INTERFACE up
 iwconfig $INTERFACE channel $CHANNEL
 ifconfig $INTERFACE up
 
-if [[ ! -f "$DB_FILE" ]]; then # create the database file if it does not exists
+# Database file creation if not exist
+if [[ ! -f "$DB_FILE" ]]; then
     touch "$DB_FILE"
     sqlite3 "$DB_FILE" <<< "
-CREATE TABLE DNS (TIMESTAMP real,MAC_SRC,MAC_DST,IP_SRC,IP_DST,URL,STATUS_CODE);"
+CREATE TABLE DNS (TIMESTAMP real,MAC_SRC,MAC_DST,IP_SRC,IP_DST,URL);"
 fi
 
-# Since we only write small amount of text, we consider the buffer of the system call 'write' to be large enough
-# and a concurrent processes writing on the same file should still be fine (no text interlacing).
-
+# Log erasing for new session
 echo -n "" > "$LOG_FILE"
-${DOT11DECRYPT_PREFIX}/dot11decrypt $INTERFACE "${ENC}:${SSID}:${PWD}" > >(awk '{printf strftime("%D %T") " " $0 "\n"; fflush();}' >> $LOG_FILE) &
-CPID1=$!
-echo "Process $CPID1 launched in background" >> $LOG_FILE
 
+# Make sure the interface has been created
+while ! [ -e "/sys/class/net/tap0" ]; do sleep 1; done
 
-while ! [ -e "/sys/class/net/tap0" ]; do sleep 1; done # wait for the interface to be created (could do the same whith events, but lazy)
+${SNIFFER_PREFIX}/sniffer $INTERFACE "${ENC}:${SSID}:${PWD}" > >(awk  '{printf strftime("%D %T") " " $0 "\n"; fflush();}' >> $LOG_FILE) &
 
 tcpdump -tt -n -e -l -s 0 -i tap0 dst port 53 |
     gawk 'match($0,/^(\w+\.\w+) ([0-9a-f:]{17}) > ([0-9a-f:]{17}).* (\w+\.\w+\.\w+\.\w+)\.\w+ > (\w+\.\w+\.\w+\.\w+).*\? (.*)\. .*?$/,g) {
