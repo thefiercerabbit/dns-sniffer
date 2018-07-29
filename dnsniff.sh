@@ -38,9 +38,6 @@ fi
 # Erase log
 echo -n "" > "$LOG_FILE"
 
-# Make sure the interface has been created
-while ! [ -e "/sys/class/net/tap0" ]; do sleep 1; done
-
 ${SNIFFER_PREFIX}/sniffer $INTERFACE "${ENC}:${SSID}:${PWD}" > >(awk  '{printf strftime("%D %T") " " $0 "\n"; fflush();}' >> $LOG_FILE) 2> >( gawk 'match($0,/^(\w+\.\w+) ([0-9a-f:]{17}) > ([0-9a-f:]{17}).* (\w+\.\w+\.\w+\.\w+)\.\w+ > (\w+\.\w+\.\w+\.\w+).*\? (.*)\. .*?$/,g) {
     "curl -o /dev/null -m 5 --silent --head --write-out '%{http_code}' " g[6] | getline status_code;
     printf "INSERT INTO DNS VALUES (\"" g[1]"\",\""g[2]"\",\""g[3]"\",\""g[4]"\",\""g[5]"\",\""g[6]"\",\""status_code"\");\n" > "/dev/stdout"; fflush("/dev/stdout");}' |
