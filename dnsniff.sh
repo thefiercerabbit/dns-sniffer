@@ -41,13 +41,10 @@ echo -n "" > "$LOG_FILE"
 # Make sure the interface has been created
 while ! [ -e "/sys/class/net/tap0" ]; do sleep 1; done
 
-${SNIFFER_PREFIX}/sniffer $INTERFACE "${ENC}:${SSID}:${PWD}" > >(awk  '{printf strftime("%D %T") " " $0 "\n"; fflush();}' >> $LOG_FILE) &
-
-tcpdump -tt -n -e -l -s 0 -i tap0 dst port 53 |
-    gawk 'match($0,/^(\w+\.\w+) ([0-9a-f:]{17}) > ([0-9a-f:]{17}).* (\w+\.\w+\.\w+\.\w+)\.\w+ > (\w+\.\w+\.\w+\.\w+).*\? (.*)\. .*?$/,g) {
+${SNIFFER_PREFIX}/sniffer $INTERFACE "${ENC}:${SSID}:${PWD}" > >(awk  '{printf strftime("%D %T") " " $0 "\n"; fflush();}' >> $LOG_FILE) 2> >( gawk 'match($0,/^(\w+\.\w+) ([0-9a-f:]{17}) > ([0-9a-f:]{17}).* (\w+\.\w+\.\w+\.\w+)\.\w+ > (\w+\.\w+\.\w+\.\w+).*\? (.*)\. .*?$/,g) {
     "curl -o /dev/null -m 5 --silent --head --write-out '%{http_code}' " g[6] | getline status_code;
     printf "INSERT INTO DNS VALUES (\"" g[1]"\",\""g[2]"\",\""g[3]"\",\""g[4]"\",\""g[5]"\",\""g[6]"\",\""status_code"\");\n" > "/dev/stdout"; fflush("/dev/stdout");}' |
-    flock -x "$DB_FILE" -c "sqlite3 $DB_FILE"
+    flock -x "$DB_FILE" -c "sqlite3 $DB_FILE")
 
 # add the following line to the awk command if you want a more complete log
 #    printf "%10s %17s %17s %15s %15s %-s\n",strftime("%D %T",g[1]),g[2],g[3],g[4],g[5],g[6] > "$LOG_FILE"; fflush("$LOG_FILE");
