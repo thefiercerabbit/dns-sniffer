@@ -271,6 +271,7 @@ public:
   dns_sniffer(const string &iface) :
     iface_(iface) {
     // config.set_buffer_size(2500);
+		config.set_immediate_mode(true);
     config.set_filter("udp and dst port 53");
   }
   
@@ -371,6 +372,7 @@ void decrypt_traffic(unique_fd fd, const string &iface, decrypter_tuple tup) {
   cerr << "Starting sniffing and decrypting traffic..." << endl;
   SnifferConfiguration config;
   config.set_promisc_mode(false);
+	config.set_immediate_mode(true); // to get packets as fast as possible
   Sniffer sniffer(iface, config);
 //  Sniffer sniffer(iface,2500,false);
   traffic_decrypter decrypter(
