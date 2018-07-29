@@ -35,7 +35,7 @@ if [[ ! -f "$DB_FILE" ]]; then
 CREATE TABLE DNS (TIMESTAMP real,MAC_SRC,MAC_DST,IP_SRC,IP_DST,URL);"
 fi
 
-# Log erasing for new session
+# Erase log
 echo -n "" > "$LOG_FILE"
 
 # Make sure the interface has been created
