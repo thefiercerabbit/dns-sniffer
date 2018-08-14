@@ -27,4 +27,4 @@ ORDER BY ip_src ASC,cnt DESC;
 .print 'LAST DNS REQUESTS'
 SELECT datetime(timestamp,'unixepoch') as TIME, mac_src, ip_src, url
 FROM DNS
-ORDER BY time DESC LIMIT 25;
+ORDER BY time DESC LIMIT 50;
