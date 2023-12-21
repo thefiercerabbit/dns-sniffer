@@ -11,7 +11,7 @@ Also, *tshark* was replaced by *tcpdump*, a bit more efficient for easy tasks li
 ## Usage
 You will need *tcpdump*, [dot11decrypt](https://github.com/mfontanini/dot11decrypt) and a network adapter in *monitor mode*.
 Replace the first fields of the script by your own network parameters (encrypion, SSID, password, channel), update the interface, log and database files, and the path to *dot11decrypt*.
-Launch has root.
+Launch as root.
 
 A basic *systemd* service file has been included, for those who may need a startup daemon (see *systemd* for your distribution).
 
